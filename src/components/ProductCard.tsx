@@ -1,7 +1,6 @@
 
 import { Heart } from "lucide-react";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { useState } from "react";
 
 export interface Product {
@@ -60,9 +59,6 @@ const ProductCard = ({ product, onToggleFavorite, isFavorite = false }: ProductC
         <h3 className="font-medium mb-2 line-clamp-2">{product.name}</h3>
         <div className="text-lg font-bold">{product.price.toLocaleString()} ₽</div>
       </CardContent>
-      <CardFooter className="p-4 pt-0">
-        <Button className="w-full">В корзину</Button>
-      </CardFooter>
     </Card>
   );
 };

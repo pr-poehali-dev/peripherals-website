@@ -1,20 +1,52 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { products, categories } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Filter, Search } from "lucide-react";
+import { toast } from "sonner";
 
 const Catalog = () => {
   const [selectedCategory, setSelectedCategory] = useState("Все");
   const [searchQuery, setSearchQuery] = useState("");
+  const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
+  
+  // Загрузка избранных товаров из localStorage
+  useEffect(() => {
+    const savedFavorites = localStorage.getItem("favorites");
+    if (savedFavorites) {
+      setFavoriteIds(JSON.parse(savedFavorites));
+    }
+  }, []);
 
+  // Фильтрация товаров по категории и поисковому запросу
   const filteredProducts = products.filter(product => {
     const matchesCategory = selectedCategory === "Все" || product.category === selectedCategory;
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  // Обработка добавления/удаления из избранного
+  const handleToggleFavorite = (id: number) => {
+    setFavoriteIds(prev => {
+      // Если товар уже в избранном - удаляем
+      if (prev.includes(id)) {
+        toast.info("Товар удален из избранного");
+        return prev.filter(itemId => itemId !== id);
+      } 
+      // Иначе добавляем
+      else {
+        toast.success("Товар добавлен в избранное");
+        return [...prev, id];
+      }
+    });
+  };
+
+  // Сохранение в localStorage при изменении избранных товаров
+  useEffect(() => {
+    localStorage.setItem("favorites", JSON.stringify(favoriteIds));
+  }, [favoriteIds]);
 
   return (
     <div className="py-6 space-y-8">
@@ -54,7 +86,12 @@ const Catalog = () => {
       {filteredProducts.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredProducts.map(product => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard 
+              key={product.id} 
+              product={product}
+              onToggleFavorite={handleToggleFavorite}
+              isFavorite={favoriteIds.includes(product.id)}
+            />
           ))}
         </div>
       ) : (
